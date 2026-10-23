@@ -21,7 +21,14 @@ class SeedDataTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected bool $seed = true;
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        // $seed = true は「テスト実行全体で最初に DB を作り直したとき」しか効かず、
+        // 他のテストクラスが先に走ると種が入らないため、各テストのトランザクション内で毎回シードする
+        $this->seed();
+    }
 
     public function test_seeds_one_user_per_role(): void
     {
