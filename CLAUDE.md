@@ -42,11 +42,35 @@
 
 ## よく使うコマンド
 
-（環境構築後に追記する）
+すべて WSL（Ubuntu）のターミナルで実行する。
+
+### backend（`~/master-studio/backend`）
+
+```bash
+./vendor/bin/sail up -d --wait       # コンテナ起動（MySQL が healthy になるまで待つ）
+./vendor/bin/sail stop               # コンテナ停止
+./vendor/bin/sail artisan migrate    # マイグレーション
+./vendor/bin/sail artisan db:show    # DB 接続確認
+./vendor/bin/sail test               # PHPUnit（MySQL の testing DB を使う）
+curl http://localhost/api/health     # API の疎通確認
+```
+
+### frontend（`~/master-studio/frontend`）
+
+```bash
+npm run dev          # 開発サーバー（http://localhost:5173、/api と /sanctum は Sail へプロキシ）
+npm run typecheck    # 型チェック
+npm run lint         # oxlint
+```
+
+### ポート
+
+- 80：Laravel（Sail）／3306：MySQL／5173：frontend の Vite
+- Sail 側の Vite は `backend/.env` の `VITE_PORT=5174` で 5173 との衝突を避けている
 
 ## 現在の進捗
 
-- [ ] 第1週（10/26〜11/1）：環境構築、/api/health の疎通、CI 雛形
+- [x] 第1週（10/26〜11/1）：環境構築、/api/health の疎通、CI 雛形
 - [ ] 第2週（11/2〜11/8）：マイグレーション、シード、ログイン、初回デプロイ
 - [ ] 第3週（11/9〜11/15）：スキーマ・本番データ API、マスタ一覧・閲覧、変更セット作成・一覧
 - [ ] 第4週（11/16〜11/22）：編集画面、一括保存、フロント側単一セル検証
