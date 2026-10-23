@@ -1,0 +1,21 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# エディタ
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# 依存・ログ（backend / frontend 側にもそれぞれ .gitignore を置く）
+node_modules/
+*.log
+
+# 環境変数（秘密情報を含むため）
+.env
+.env.*
+!.env.example
+
+# Claude Code の個人設定
+.claude/settings.local.json

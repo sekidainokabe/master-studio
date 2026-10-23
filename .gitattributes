@@ -1,0 +1,9 @@
+# テキストファイルの改行を LF に統一する（Windows と WSL の混在による差分を防ぐ）
+* text=auto eol=lf
+
+# バイナリとして扱うファイル
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.woff2 binary
