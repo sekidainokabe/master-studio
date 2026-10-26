@@ -8,5 +8,6 @@ php artisan route:cache
 php artisan view:cache
 
 php artisan migrate --force
+php artisan app:seed-if-empty
 
 exec frankenphp run --config /etc/caddy/Caddyfile

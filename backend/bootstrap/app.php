@@ -15,6 +15,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // SPA からの API リクエストでセッション（クッキー）と CSRF 検証を有効にする
         $middleware->statefulApi();
+
+        // 本番では Railway のプロキシが HTTPS を終端し、X-Forwarded-* ヘッダーで元のリクエストを伝える。
+        // プロキシの IP は固定でなく、アプリへはプロキシ経由でしか届かないため、すべてのプロキシを信頼する
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
