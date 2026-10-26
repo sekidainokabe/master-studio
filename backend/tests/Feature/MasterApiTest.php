@@ -86,7 +86,10 @@ class MasterApiTest extends TestCase
 
     public function test_unknown_master_returns_404(): void
     {
-        $this->actingAsEditor()->getJson('/api/masters/unknown/schema')->assertNotFound();
+        // 内部のクラス名などを含まない、汎用のメッセージだけを返す
+        $this->actingAsEditor()->getJson('/api/masters/unknown/schema')
+            ->assertNotFound()
+            ->assertExactJson(['message' => 'Not found.']);
         $this->actingAsEditor()->getJson('/api/masters/unknown/records')->assertNotFound();
     }
 

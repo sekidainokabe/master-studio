@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChangesetController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MasterController;
 use Illuminate\Support\Facades\Route;
@@ -17,4 +18,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/masters', [MasterController::class, 'index']);
     Route::get('/masters/{masterTable:key}/schema', [MasterController::class, 'schema']);
     Route::get('/masters/{masterTable:key}/records', [MasterController::class, 'records']);
+
+    Route::get('/changesets', [ChangesetController::class, 'index']);
+    Route::post('/changesets', [ChangesetController::class, 'store']);
+    Route::get('/changesets/{changeset}', [ChangesetController::class, 'show']);
 });

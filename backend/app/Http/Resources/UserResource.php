@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Changeset;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -23,6 +24,10 @@ class UserResource extends JsonResource
             'name' => $this->name,
             'email' => $this->email,
             'role' => $this->role->value,
+            // 画面でボタンを出し分けるための権限。判定は Policy に任せ、フロントに権限のルールを重複させない
+            'can' => [
+                'create_changeset' => $this->resource->can('create', Changeset::class),
+            ],
         ];
     }
 }
