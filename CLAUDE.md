@@ -50,6 +50,8 @@
 ./vendor/bin/sail up -d --wait       # コンテナ起動（MySQL が healthy になるまで待つ）
 ./vendor/bin/sail stop               # コンテナ停止
 ./vendor/bin/sail artisan migrate    # マイグレーション
+./vendor/bin/sail artisan migrate:fresh --seed   # DB を作り直してシード（開発データは消える）
+./vendor/bin/sail artisan app:seed-if-empty      # 未シードのときだけシード（本番の起動時に実行される）
 ./vendor/bin/sail artisan db:show    # DB 接続確認
 ./vendor/bin/sail test               # PHPUnit（MySQL の testing DB を使う）
 curl http://localhost/api/health     # API の疎通確認
@@ -60,8 +62,19 @@ curl http://localhost/api/health     # API の疎通確認
 ```bash
 npm run dev          # 開発サーバー（http://localhost:5173、/api と /sanctum は Sail へプロキシ）
 npm run typecheck    # 型チェック
+npm test             # Vitest
 npm run lint         # oxlint
 ```
+
+パッケージを追加したら開発サーバーを起動し直す（古い依存ファイルが残り「Invalid hook call」などが出るため）。
+
+### 本番用イメージ（`~/master-studio`）
+
+```bash
+docker build -t master-studio:local .   # リポジトリ直下の Dockerfile でビルド
+```
+
+ローカルで起動するときは Sail のネットワーク（`backend_sail`）につなぎ、`APP_KEY`・`DB_*`・`SANCTUM_STATEFUL_DOMAINS=localhost:8080` を渡して `-p 8080:8080` で起動する。起動時にマイグレーションと `app:seed-if-empty` が実行される。
 
 ### ポート
 
@@ -72,6 +85,7 @@ npm run lint         # oxlint
 
 - [x] 第1週（10/26〜11/1）：環境構築、/api/health の疎通、CI 雛形
 - [ ] 第2週（11/2〜11/8）：マイグレーション、シード、ログイン、初回デプロイ
+  - デプロイのみ保留（Railway の新規登録が停止中のため。10/26 時点）。本番用イメージはローカルで動作確認済み。Railway での残り作業は docs/plan-week2.md の 5-3・5-4
 - [ ] 第3週（11/9〜11/15）：スキーマ・本番データ API、マスタ一覧・閲覧、変更セット作成・一覧
 - [ ] 第4週（11/16〜11/22）：編集画面、一括保存、フロント側単一セル検証
 - [ ] 第5週（11/23〜11/29）：サーバー側横断検証、CSV 取り込み、差分
