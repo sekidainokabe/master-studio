@@ -8,6 +8,10 @@ export type User = {
   name: string
   email: string
   role: UserRole
+  /** サーバーの Policy で判定した権限。ボタンの出し分けに使う（最終的な判定はサーバー側） */
+  can: {
+    create_changeset: boolean
+  }
 }
 
 export type Credentials = {

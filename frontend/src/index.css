@@ -72,8 +72,7 @@ input {
 .app-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 24px;
   padding: 12px 24px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
@@ -83,6 +82,22 @@ input {
   font-weight: 700;
   color: var(--text-h);
   text-decoration: none;
+}
+
+.app-nav {
+  display: flex;
+  flex: 1;
+  gap: 16px;
+}
+
+.app-nav a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+.app-nav a.active {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .app-user {
@@ -95,6 +110,112 @@ input {
   max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
+}
+
+a {
+  color: var(--accent);
+}
+
+.sub {
+  font-size: 0.8em;
+  color: var(--text);
+  opacity: 0.75;
+  font-weight: normal;
+}
+
+.mono {
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.breadcrumb {
+  margin: 0;
+  font-size: 0.9em;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-title h1 {
+  margin: 8px 0;
+}
+
+.button-link {
+  padding: 6px 16px;
+  border-radius: 6px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+}
+
+/* 一覧・閲覧の表 */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.filter-select {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+select {
+  font: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+/* 列が多いマスタでも画面全体が横に崩れないよう、表だけを横スクロールさせる */
+.table-scroll {
+  overflow: auto;
+  max-height: 70vh;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+
+.data-table th,
+.data-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.data-table th {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  color: var(--text-h);
+  white-space: nowrap;
+}
+
+.data-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.data-table tbody tr:hover {
+  background: var(--surface);
 }
 
 /* ログイン画面 */
