@@ -1,0 +1,19 @@
+# ビルドに不要なもの・秘密情報・ローカルで作られたキャッシュをイメージに入れない
+.git
+.github
+docs
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+
+frontend/dist
+
+backend/vendor
+backend/bootstrap/cache/*.php
+backend/storage/logs/*
+backend/storage/framework/cache/data/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/.phpunit.cache
+backend/tests

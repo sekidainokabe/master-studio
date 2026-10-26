@@ -1,0 +1,14 @@
+{
+	# HTTPS は Railway の前段で終端されるため、コンテナ内では HTTP だけを扱う
+	auto_https off
+	admin off
+	frankenphp
+}
+
+# Railway は待ち受けポートを PORT 環境変数で渡す（ローカルでは 8080）
+:{$PORT:8080} {
+	root * /app/public
+	encode zstd br gzip
+	# public/ にファイルがあればそれを返し、なければ Laravel（public/index.php）に渡す
+	php_server
+}
