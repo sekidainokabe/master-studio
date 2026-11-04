@@ -17,6 +17,7 @@ export function AppLayout() {
         {/* NavLink は表示中のページのリンクに active クラスを付ける（/masters/enemies でも「マスタ」が選択状態になる） */}
         <nav className="app-nav">
           <NavLink to="/masters">マスタ</NavLink>
+          <NavLink to="/changesets">変更セット</NavLink>
         </nav>
         {user && (
           <div className="app-user">
