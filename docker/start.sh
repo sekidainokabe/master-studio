@@ -5,7 +5,8 @@ set -e
 
 php artisan config:cache
 php artisan route:cache
-php artisan view:cache
+# view:cache は行わない。画面は React で作っており Blade テンプレートを持たないうえ、
+# 空の resources/views は Git に入らないため、本番では「フォルダがない」エラーで起動が止まる
 
 php artisan migrate --force
 php artisan app:seed-if-empty
