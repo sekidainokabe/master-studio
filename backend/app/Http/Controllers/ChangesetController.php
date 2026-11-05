@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Enums\ChangesetStatus;
 use App\Http\Requests\StoreChangesetRequest;
+use App\Http\Requests\UpdateChangesetRequest;
 use App\Http\Resources\ChangesetResource;
 use App\Models\Changeset;
 use App\Models\Release;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 
 class ChangesetController extends Controller
@@ -51,6 +54,23 @@ class ChangesetController extends Controller
     public function show(Changeset $changeset): ChangesetResource
     {
         return $this->detail($changeset);
+    }
+
+    public function update(UpdateChangesetRequest $request, Changeset $changeset): ChangesetResource
+    {
+        $changeset->update($request->validated());
+
+        return $this->detail($changeset);
+    }
+
+    /** 下書きの取り下げ。中の変更（changeset_items）も外部キーの cascade で一緒に消える */
+    public function destroy(Changeset $changeset): Response
+    {
+        Gate::authorize('delete', $changeset);
+
+        $changeset->delete();
+
+        return response()->noContent();
     }
 
     private function detail(Changeset $changeset): ChangesetResource

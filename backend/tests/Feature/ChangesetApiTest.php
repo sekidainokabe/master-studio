@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ChangeOperation;
 use App\Enums\ChangesetStatus;
 use App\Enums\UserRole;
 use App\Models\Changeset;
+use App\Models\MasterTable;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -150,5 +152,107 @@ class ChangesetApiTest extends TestCase
     {
         $this->getJson('/api/changesets')->assertUnauthorized();
         $this->postJson('/api/changesets', ['title' => 'x'])->assertUnauthorized();
+    }
+
+    public function test_show_tells_author_can_update_and_delete_draft(): void
+    {
+        $editor = $this->user(UserRole::Editor);
+        $changeset = Changeset::factory()->for($editor, 'author')->create();
+
+        $this->actingAs($editor, 'web')
+            ->getJson("/api/changesets/{$changeset->id}")
+            ->assertJsonPath('data.can', ['update' => true, 'delete' => true]);
+    }
+
+    public function test_show_tells_approver_cannot_update(): void
+    {
+        $changeset = Changeset::factory()->for($this->user(UserRole::Editor), 'author')->create();
+
+        $this->actingAs($this->user(UserRole::Approver), 'web')
+            ->getJson("/api/changesets/{$changeset->id}")
+            ->assertJsonPath('data.can', ['update' => false, 'delete' => false]);
+    }
+
+    public function test_author_can_update_title_and_description(): void
+    {
+        $editor = $this->user(UserRole::Editor);
+        $changeset = Changeset::factory()->for($editor, 'author')->create(['description' => '元の説明']);
+
+        $this->actingAs($editor, 'web')
+            ->patchJson("/api/changesets/{$changeset->id}", ['title' => '新しいタイトル'])
+            ->assertOk()
+            ->assertJsonPath('data.title', '新しいタイトル')
+            // 送らなかった項目は変わらない
+            ->assertJsonPath('data.description', '元の説明');
+    }
+
+    public function test_update_validates_title(): void
+    {
+        $editor = $this->user(UserRole::Editor);
+        $changeset = Changeset::factory()->for($editor, 'author')->create();
+
+        $this->actingAs($editor, 'web')
+            ->patchJson("/api/changesets/{$changeset->id}", ['title' => ''])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['title']);
+    }
+
+    public function test_other_editor_cannot_update(): void
+    {
+        $changeset = Changeset::factory()->create();
+
+        $this->actingAs($this->user(UserRole::Editor), 'web')
+            ->patchJson("/api/changesets/{$changeset->id}", ['title' => '他人の変更'])
+            ->assertForbidden();
+    }
+
+    public function test_cannot_update_after_submission(): void
+    {
+        $editor = $this->user(UserRole::Editor);
+        $changeset = Changeset::factory()->for($editor, 'author')->status(ChangesetStatus::InReview)->create();
+
+        $this->actingAs($editor, 'web')
+            ->patchJson("/api/changesets/{$changeset->id}", ['title' => 'レビュー中の変更'])
+            ->assertStatus(409);
+    }
+
+    public function test_author_can_delete_draft_with_its_items(): void
+    {
+        $editor = $this->user(UserRole::Editor);
+        $changeset = Changeset::factory()->for($editor, 'author')->create();
+        $changeset->items()->create([
+            'master_table_id' => MasterTable::where('key', 'abilities')->value('id'),
+            'record_key' => 'ab_901',
+            'operation' => ChangeOperation::Create,
+            'after_data' => ['name' => '新技'],
+        ]);
+
+        $this->actingAs($editor, 'web')
+            ->deleteJson("/api/changesets/{$changeset->id}")
+            ->assertNoContent();
+
+        $this->assertModelMissing($changeset);
+        $this->assertDatabaseCount('changeset_items', 0);
+    }
+
+    public function test_approver_cannot_delete(): void
+    {
+        $changeset = Changeset::factory()->create();
+
+        $this->actingAs($this->user(UserRole::Approver), 'web')
+            ->deleteJson("/api/changesets/{$changeset->id}")
+            ->assertForbidden();
+        $this->assertModelExists($changeset);
+    }
+
+    public function test_cannot_delete_applied_changeset(): void
+    {
+        $admin = $this->user(UserRole::Admin);
+        $changeset = Changeset::factory()->status(ChangesetStatus::Applied)->create();
+
+        $this->actingAs($admin, 'web')
+            ->deleteJson("/api/changesets/{$changeset->id}")
+            ->assertStatus(409);
+        $this->assertModelExists($changeset);
     }
 }

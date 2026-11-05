@@ -23,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/changesets', [ChangesetController::class, 'index']);
     Route::post('/changesets', [ChangesetController::class, 'store']);
     Route::get('/changesets/{changeset}', [ChangesetController::class, 'show']);
+    Route::patch('/changesets/{changeset}', [ChangesetController::class, 'update']);
+    Route::delete('/changesets/{changeset}', [ChangesetController::class, 'destroy']);
 
     // URL の中で2つ目以降のモデルを key で取り出すと、Laravel は「1つ目のモデルに属するもの」だけを探す（$changeset->masterTables()）。
     // マスタは変更セットに属さないため、この絞り込みを外す

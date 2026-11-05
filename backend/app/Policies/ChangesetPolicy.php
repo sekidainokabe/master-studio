@@ -39,4 +39,10 @@ class ChangesetPolicy
 
         return Response::allow();
     }
+
+    /** 削除も編集と同じ条件（下書きのうちは作成者が取り下げられる） */
+    public function delete(User $user, Changeset $changeset): Response
+    {
+        return $this->update($user, $changeset);
+    }
 }

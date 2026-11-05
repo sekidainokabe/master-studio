@@ -30,6 +30,11 @@ class ChangesetResource extends JsonResource
             'reviewed_at' => $this->reviewed_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
+            // 画面でボタンを出すかどうかの判断に使う。最終的にはサーバーが Policy で拒否する
+            'can' => [
+                'update' => $request->user()?->can('update', $this->resource) ?? false,
+                'delete' => $request->user()?->can('delete', $this->resource) ?? false,
+            ],
         ];
     }
 }
