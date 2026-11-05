@@ -80,6 +80,12 @@
 - 5-3 で Railway のアカウントを作ろうとしたところ、「Sign ups are currently disabled」となった。公式ステータスページに 10/23 付けで「新規登録を一時停止」の告知あり
 - 5-3・5-4 は再開まで保留し、第3週の作業を先に進める。11/2 ごろまでに再開しなければ、デプロイ先を見直す（候補：Laravel Cloud、Fly.io）
 
+#### 進捗（2026-11-05）
+
+- 11/4 に Railway の新規登録が再開していたため、5-3・5-4 を実施して完了した
+- 初回デプロイで起動に失敗した。空の `resources/views` が Git に入らず、`view:cache` がエラーになっていたためで、`start.sh` から `view:cache` を外して直した
+- OFF → ON でデータが残ることを確認した。アプリを Redeploy すると古いコミットが起動することがあるため、ON の手順では Deploy Latest Commit を使う（docs/deploy.md）
+
 ### ステップ6：仕上げ
 
 - CLAUDE.md の進捗を更新する
