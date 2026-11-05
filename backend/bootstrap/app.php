@@ -20,6 +20,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // 本番では Railway のプロキシが HTTPS を終端し、X-Forwarded-* ヘッダーで元のリクエストを伝える。
         // プロキシの IP は固定でなく、アプリへはプロキシ経由でしか届かないため、すべてのプロキシを信頼する
         $middleware->trustProxies(at: '*');
+
+        // 未ログイン時、Laravel は既定で名前付きルート "login" へのリダイレクト先を作ろうとする。
+        // このアプリにはそのルートがなく、JSON を求めないリクエストでは 500 になるため、SPA のログイン画面を指定する
+        // （api/* は下の shouldRenderJsonWhen により、リダイレクトではなく 401 の JSON になる）
+        $middleware->redirectGuestsTo('/login');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

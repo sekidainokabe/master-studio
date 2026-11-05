@@ -91,6 +91,14 @@ class AuthTest extends TestCase
         $this->getJson('/api/me')->assertUnauthorized();
     }
 
+    public function test_api_returns_401_json_even_without_accept_header(): void
+    {
+        // curl などで Accept ヘッダーを付けずに呼んでも、ログイン画面へのリダイレクトや 500 にならない
+        $this->get('/api/me')
+            ->assertUnauthorized()
+            ->assertExactJson(['message' => 'Unauthenticated.']);
+    }
+
     public function test_logout_ends_the_session(): void
     {
         $this->postJson('/api/login', [
