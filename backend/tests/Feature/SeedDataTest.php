@@ -9,6 +9,7 @@ use App\Models\MasterRecord;
 use App\Models\MasterTable;
 use App\Models\Release;
 use App\Models\User;
+use App\Validation\CellValidator;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Tests\TestCase;
@@ -63,6 +64,19 @@ class SeedDataTest extends TestCase
                 foreach ($table->columns as $column) {
                     $this->assertValueMatchesColumn($column, $data[$column->key], $recordKeysByTableId, "{$label}.{$column->key}");
                 }
+            }
+        }
+    }
+
+    public function test_seed_records_pass_cell_validation(): void
+    {
+        // 実際の列定義（DB から読んだ DECIMAL の範囲など）でも、検証クラスが正しく動くことを確かめる
+        $validator = new CellValidator;
+
+        foreach (MasterTable::with(['columns', 'records'])->get() as $table) {
+            foreach ($table->records as $record) {
+                $errors = $validator->validateRecord($table->columns, $record->data);
+                $this->assertSame([], $errors, "{$table->key}.{$record->record_key} に検証エラーがある");
             }
         }
     }
