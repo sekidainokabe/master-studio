@@ -63,3 +63,13 @@
 ## 補足
 
 - コミットはステップごとに作る
+
+## 進捗（2026-11-11 完了）
+
+- ステップ1〜6 を完了。PHPUnit 96件、Vitest 73件
+- 11/10 の計画見直しで、Laravel のエラーメッセージの日本語化を第4週に加えた
+  - 翻訳パッケージは入れず、使っているルールだけを `backend/lang/ja/validation.php` に訳した。既定の言語は `ja`（`config/app.php`）なので、本番の環境変数は変えなくてよい
+- TanStack Table は v9 が入った。v8 と書き方が違う（`useTable`、`tableFeatures`）
+- 保存前の編集は画面側に「record_key → 値（削除は null）」で持ち、保存のときにまとめて PUT で送る（`frontend/src/lib/editDraft.ts`）
+- ブラウザで確認したこと：editor で編集 → 保存 → 再読み込みしても残る、エラーのセルが赤くなり理由が出る、未保存のままタブを切り替えると確認が出る、approver は閲覧のみ
+- 他の editor の変更セットで編集できないことは、シードに editor が1人しかいないため PHPUnit（403）で確認した

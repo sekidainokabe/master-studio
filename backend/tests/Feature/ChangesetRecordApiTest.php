@@ -187,7 +187,11 @@ class ChangesetRecordApiTest extends TestCase
             ['record_key' => 'AB-1', 'data' => []],
             ['record_key' => 'ab_901', 'data' => ['unknown' => 1]],
             ['record_key' => 'ab_901', 'data' => []],
-        ])->assertUnprocessable()->assertJsonValidationErrors(['records.0.record_key', 'records.1.record_key', 'records.2.record_key']);
+        ])->assertUnprocessable()->assertJsonValidationErrors([
+            'records.0.record_key' => 'record_key は半角の英小文字・数字・_ で入力してください。',
+            'records.1.record_key' => 'record_keyが重複しています。',
+            'records.2.record_key' => 'record_keyが重複しています。',
+        ]);
 
         $this->save([['record_key' => 'ab_901', 'data' => ['unknown' => 1]]])
             ->assertUnprocessable()

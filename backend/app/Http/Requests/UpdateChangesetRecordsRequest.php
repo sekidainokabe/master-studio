@@ -38,6 +38,32 @@ class UpdateChangesetRecordsRequest extends FormRequest
     }
 
     /**
+     * エラーメッセージで使う項目名（「records.0.record_key」ではなく「record_key」と表示する）
+     *
+     * @return array<string, string>
+     */
+    public function attributes(): array
+    {
+        return [
+            'records' => '保存する行',
+            'records.*' => '行',
+            'records.*.record_key' => 'record_key',
+            'records.*.data' => '行の値',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            // 「形式が正しくありません」だけでは直し方が分からないため、使える文字を示す（画面の検証と同じ文言）
+            'records.*.record_key.regex' => 'record_key は半角の英小文字・数字・_ で入力してください。',
+        ];
+    }
+
+    /**
      * @return list<callable(Validator): void>
      */
     public function after(): array

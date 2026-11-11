@@ -69,11 +69,12 @@ class ChangesetApiTest extends TestCase
 
         $this->actingAs($editor, 'web')->postJson('/api/changesets', [])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['title']);
+            ->assertJsonValidationErrors(['title' => 'タイトルは必須です。']);
 
+        // メッセージは日本語（lang/ja/validation.php）で、項目名も日本語になる
         $this->actingAs($editor, 'web')->postJson('/api/changesets', ['title' => str_repeat('あ', 201)])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors(['title']);
+            ->assertJsonValidationErrors(['title' => 'タイトルは200文字以内で入力してください。']);
 
         $this->actingAs($editor, 'web')->postJson('/api/changesets', ['title' => str_repeat('あ', 200)])
             ->assertCreated();
