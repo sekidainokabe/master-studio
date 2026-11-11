@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
-import { useQueries, useQuery, type UseQueryResult } from '@tanstack/react-query'
+import { useMutation, useQueries, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 import { apiFetch } from './api'
+import { changesetKeys } from './changesets'
 import type { CellValue, MasterColumn, RefLabels } from './masters'
 
 export type RowStatus = 'unchanged' | 'created' | 'updated' | 'deleted'
@@ -34,6 +35,24 @@ export function useChangesetRecords(changesetId: number, masterKey: string) {
   return useQuery({
     queryKey: changesetRecordKeys.records(changesetId, masterKey),
     queryFn: () => fetchRows(changesetId, masterKey),
+  })
+}
+
+/** 編集した行をまとめて保存する。サーバーは保存後の行（検証結果つき）を返す */
+export function useSaveChangesetRecords(changesetId: number, masterKey: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: { records: { record_key: string; data: Record<string, CellValue> | null }[] }) =>
+      apiFetch<{ data: EditRow[] }>(`/api/changesets/${changesetId}/masters/${masterKey}/records`, {
+        method: 'PUT',
+        body: payload,
+      }).then((res) => res.data),
+    onSuccess: (rows) => {
+      queryClient.setQueryData(changesetRecordKeys.records(changesetId, masterKey), rows)
+      // 変更件数や更新日時が変わるので、変更セットの詳細と一覧も取り直させる
+      queryClient.invalidateQueries({ queryKey: changesetKeys.detail(changesetId) })
+      queryClient.invalidateQueries({ queryKey: [...changesetKeys.all, 'list'] })
+    },
   })
 }
 
