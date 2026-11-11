@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router'
 import { AppLayout } from './components/AppLayout'
 import { RequireAuth } from './components/RequireAuth'
 import { ChangesetDetailPage } from './pages/ChangesetDetailPage'
+import { ChangesetEditPage } from './pages/ChangesetEditPage'
 import { ChangesetNewPage } from './pages/ChangesetNewPage'
 import { ChangesetsPage } from './pages/ChangesetsPage'
 import { HomePage } from './pages/HomePage'
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
           // 'new' は ':id' より具体的なので、React Router はこちらを優先して選ぶ
           { path: 'changesets/new', element: <ChangesetNewPage /> },
           { path: 'changesets/:id', element: <ChangesetDetailPage /> },
+          { path: 'changesets/:id/edit', element: <ChangesetEditPage /> },
         ],
       },
     ],

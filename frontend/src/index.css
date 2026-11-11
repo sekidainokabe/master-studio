@@ -316,6 +316,57 @@ textarea {
   white-space: pre-wrap;
 }
 
+/* 変更セットの編集画面 */
+.notice {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 16px 0 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tab {
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.tab.active {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.edit-table .row-created {
+  background: rgb(22 163 74 / 0.12);
+}
+
+.edit-table .row-deleted td {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.edit-table .cell-changed {
+  background: rgb(234 179 8 / 0.2);
+}
+
+.edit-table .cell-error {
+  outline: 2px solid var(--danger);
+  outline-offset: -2px;
+  background: rgb(220 38 38 / 0.1);
+}
+
 /* ログイン画面 */
 .login {
   max-width: 360px;

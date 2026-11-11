@@ -64,20 +64,22 @@ function ChangesetDetail({ changeset: c }: { changeset: Changeset }) {
             <StatusBadge status={c.status} />
           </div>
 
-          {(c.can.update || c.can.delete) && (
-            <div className="button-row">
-              {c.can.update && (
-                <button type="button" className="secondary" onClick={() => setEditing(true)}>
-                  タイトル・説明を編集
-                </button>
-              )}
-              {c.can.delete && (
-                <button type="button" className="danger" onClick={handleDelete} disabled={remove.isPending}>
-                  {remove.isPending ? '削除中…' : '削除'}
-                </button>
-              )}
-            </div>
-          )}
+          <div className="button-row">
+            {/* 編集できない人にも中身は見せる（承認者のレビューなど） */}
+            <Link to={`/changesets/${c.id}/edit`} className="button-link">
+              {c.can.update ? 'データを編集' : 'データを見る'}
+            </Link>
+            {c.can.update && (
+              <button type="button" className="secondary" onClick={() => setEditing(true)}>
+                タイトル・説明を編集
+              </button>
+            )}
+            {c.can.delete && (
+              <button type="button" className="danger" onClick={handleDelete} disabled={remove.isPending}>
+                {remove.isPending ? '削除中…' : '削除'}
+              </button>
+            )}
+          </div>
           {remove.isError && (
             <p className="error" role="alert">
               削除できませんでした。
@@ -100,7 +102,7 @@ function ChangesetDetail({ changeset: c }: { changeset: Changeset }) {
           <h2>説明</h2>
           <p className="description">{c.description || '（なし）'}</p>
 
-          <p className="sub">データの編集画面は、このあと追加します。差分の確認とレビュー依頼は、第5〜6週に追加します。</p>
+          <p className="sub">差分の確認とレビュー依頼は、第5〜6週に追加します。</p>
         </>
       )}
     </>
