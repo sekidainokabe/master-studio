@@ -510,3 +510,42 @@ button.link {
   flex-direction: column;
   gap: 4px;
 }
+
+/* 差分（変更セットの詳細画面） */
+.diff-section h3 {
+  margin: 16px 0 4px;
+  font-size: 1rem;
+}
+
+.diff-table .row-created {
+  background: rgb(22 163 74 / 0.12);
+}
+
+.diff-table .row-deleted {
+  background: rgb(220 38 38 / 0.1);
+}
+
+.diff-table td {
+  vertical-align: top;
+}
+
+.diff-changes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.diff-changes .cell-changed {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgb(234 179 8 / 0.2);
+}
+
+.diff-changes del {
+  opacity: 0.7;
+}
+
+.diff-changes ins {
+  text-decoration: none;
+  font-weight: 700;
+}

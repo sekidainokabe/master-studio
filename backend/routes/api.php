@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChangesetController;
+use App\Http\Controllers\ChangesetDiffController;
 use App\Http\Controllers\ChangesetRecordController;
 use App\Http\Controllers\ChangesetValidationController;
 use App\Http\Controllers\HealthController;
@@ -27,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/changesets/{changeset}', [ChangesetController::class, 'update']);
     Route::delete('/changesets/{changeset}', [ChangesetController::class, 'destroy']);
     Route::get('/changesets/{changeset}/validation', ChangesetValidationController::class);
+    Route::get('/changesets/{changeset}/diff', ChangesetDiffController::class);
 
     // URL の中で2つ目以降のモデルを key で取り出すと、Laravel は「1つ目のモデルに属するもの」だけを探す（$changeset->masterTables()）。
     // マスタは変更セットに属さないため、この絞り込みを外す

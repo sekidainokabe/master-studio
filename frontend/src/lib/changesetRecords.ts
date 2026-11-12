@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useMutation, useQueries, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 import { apiFetch } from './api'
+import { changesetDiffKey } from './changesetDiff'
 import { changesetKeys } from './changesets'
 import { changesetValidationKey } from './changesetValidation'
 import type { CellValue, MasterColumn, RefLabels } from './masters'
@@ -55,6 +56,7 @@ export function useSaveChangesetRecords(changesetId: number, masterKey: string) 
       queryClient.invalidateQueries({ queryKey: [...changesetKeys.all, 'list'] })
       // 横断検証は他のマスタの行にも影響するので、変更セット全体の検証結果を取り直す
       queryClient.invalidateQueries({ queryKey: changesetValidationKey(changesetId) })
+      queryClient.invalidateQueries({ queryKey: changesetDiffKey(changesetId) })
     },
   })
 }

@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
 import { ChangesetForm } from '../components/ChangesetForm'
+import { DiffView } from '../components/DiffView'
 import { StatusBadge } from '../components/StatusBadge'
+import { useChangesetValidation } from '../lib/changesetValidation'
 import { useChangeset, useDeleteChangeset, useUpdateChangeset, type Changeset } from '../lib/changesets'
 import { formatDateTime } from '../lib/format'
 
-/** 変更セットの詳細。今は基本情報と編集・削除のみで、差分・検証結果・承認などは第5〜6週に追加する */
+/** 変更セットの詳細。基本情報、検証結果の件数、今の本番との差分。レビュー依頼・承認は第6週に追加する */
 export function ChangesetDetailPage() {
   const { id } = useParams()
   const changeset = useChangeset(Number(id))
@@ -102,9 +104,38 @@ function ChangesetDetail({ changeset: c }: { changeset: Changeset }) {
           <h2>説明</h2>
           <p className="description">{c.description || '（なし）'}</p>
 
-          <p className="sub">差分の確認とレビュー依頼は、第5〜6週に追加します。</p>
+          <h2>検証結果</h2>
+          <ValidationSummary changesetId={c.id} />
+
+          <h2>差分（今の本番との比較）</h2>
+          <DiffView changesetId={c.id} />
+
+          <p className="sub">レビュー依頼と承認は、第6週に追加します。</p>
         </>
       )}
     </>
+  )
+}
+
+/** 検証エラーの件数。一覧は編集画面のパネルで見る */
+function ValidationSummary({ changesetId }: { changesetId: number }) {
+  const validation = useChangesetValidation(changesetId)
+
+  if (validation.isError) {
+    return <p role="alert">検証結果を取得できませんでした。</p>
+  }
+  if (validation.isPending) {
+    return <p className="sub">検証しています…</p>
+  }
+
+  const { counts } = validation.data
+  if (counts.total === 0) {
+    return <p>エラーはありません。</p>
+  }
+  return (
+    <p className="error">
+      エラーが {counts.total} 件あります（入力 {counts.cell} 件・マスタ間 {counts.cross} 件）。
+      <Link to={`/changesets/${changesetId}/edit`}>編集画面で確認する</Link>
+    </p>
   )
 }
