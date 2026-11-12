@@ -421,6 +421,77 @@ button.small {
   background: rgb(220 38 38 / 0.1);
 }
 
+/* 検証結果のパネル（編集画面） */
+.validation-panel {
+  margin: 16px 0 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+}
+
+.validation-panel h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.validation-panel p {
+  margin: 4px 0;
+}
+
+.validation-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.validation-list h3 {
+  margin: 8px 0 2px;
+  font-size: 0.9rem;
+}
+
+.validation-list ul {
+  margin: 0;
+  padding-left: 1.2em;
+}
+
+button.link {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--accent);
+  text-decoration: underline;
+}
+
+.badge-cross {
+  margin-left: 6px;
+  padding: 0 6px;
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  color: var(--danger);
+  font-size: 0.75em;
+}
+
+.tab-count {
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.75em;
+  font-weight: 700;
+}
+
+/* パネルから移動した行を一瞬強調する */
+.edit-table .row-focus td {
+  animation: row-focus 2s ease-out;
+}
+
+@keyframes row-focus {
+  from {
+    background: rgb(37 99 235 / 0.35);
+  }
+}
+
 /* ログイン画面 */
 .login {
   max-width: 360px;

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table'
-import { Link, useBlocker, useParams, useSearchParams } from 'react-router'
+import { Link, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router'
 import { StatusBadge } from '../components/StatusBadge'
+import { ValidationPanel, type JumpTarget } from '../components/ValidationPanel'
 import { ApiError } from '../lib/api'
 import { useChangeset } from '../lib/changesets'
 import {
@@ -13,6 +14,13 @@ import {
   type RefOption,
   type RowStatus,
 } from '../lib/changesetRecords'
+import {
+  countByMaster,
+  mergeCrossErrors,
+  ROW_ERROR_KEY,
+  useChangesetValidation,
+  type ValidationError,
+} from '../lib/changesetValidation'
 import {
   applyDrafts,
   buildPayload,
@@ -34,7 +42,12 @@ export function ChangesetEditPage() {
   const changesetId = Number(id)
   const changeset = useChangeset(changesetId)
   const masters = useMasters()
+  const validation = useChangesetValidation(changesetId)
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+  // 検証結果のパネルで押したエラーの場所。表が描画されたら、その行まで移動する
+  const [jump, setJump] = useState<JumpTarget | null>(null)
+  const clearJump = useCallback(() => setJump(null), [])
 
   if (changeset.isError || masters.isError) {
     return <p role="alert">変更セットを取得できませんでした。存在しない変更セットの可能性があります。</p>
@@ -46,6 +59,15 @@ export function ChangesetEditPage() {
   const c = changeset.data
   const masterKey = searchParams.get('master') ?? masters.data[0]?.key ?? ''
   const master = masters.data.find((m) => m.key === masterKey)
+  const errorCounts = countByMaster(validation.data?.errors ?? [])
+
+  const handleJump = (target: JumpTarget) => {
+    if (target.master !== masterKey) {
+      // 未保存の編集があれば、タブの切り替えと同じく離脱の確認が出る
+      navigate(`?master=${target.master}`)
+    }
+    setJump(target)
+  }
 
   return (
     <>
@@ -66,6 +88,8 @@ export function ChangesetEditPage() {
         </p>
       )}
 
+      <ValidationPanel changesetId={c.id} masters={masters.data} onJump={handleJump} />
+
       <nav className="tabs" aria-label="マスタ">
         {masters.data.map((m) => (
           <Link
@@ -75,13 +99,26 @@ export function ChangesetEditPage() {
             aria-current={m.key === masterKey ? 'page' : undefined}
           >
             {m.name}
+            {errorCounts[m.key] > 0 && (
+              <span className="tab-count" aria-label={`エラー ${errorCounts[m.key]} 件`}>
+                {errorCounts[m.key]}
+              </span>
+            )}
           </Link>
         ))}
       </nav>
 
       {master ? (
         // マスタを切り替えたら表を作り直し、前のマスタの状態を持ち越さない（未保存の編集は離脱の確認で守る）
-        <EditGrid key={master.key} changesetId={c.id} masterKey={master.key} editable={c.can.update} />
+        <EditGrid
+          key={master.key}
+          changesetId={c.id}
+          masterKey={master.key}
+          editable={c.can.update}
+          validationErrors={validation.data?.errors}
+          jump={jump}
+          onJumpHandled={clearJump}
+        />
       ) : (
         <p role="alert">指定されたマスタはありません。上のタブから選んでください。</p>
       )}
@@ -107,7 +144,21 @@ type Actions = {
   restoreRow: (row: DisplayRow) => void
 }
 
-function EditGrid({ changesetId, masterKey, editable }: { changesetId: number; masterKey: string; editable: boolean }) {
+function EditGrid({
+  changesetId,
+  masterKey,
+  editable,
+  validationErrors,
+  jump,
+  onJumpHandled,
+}: {
+  changesetId: number
+  masterKey: string
+  editable: boolean
+  validationErrors: ValidationError[] | undefined
+  jump: JumpTarget | null
+  onJumpHandled: () => void
+}) {
   const schema = useMasterSchema(masterKey)
   const rows = useChangesetRecords(changesetId, masterKey)
   const refs = useChangesetRefs(changesetId, schema.data)
@@ -145,10 +196,31 @@ function EditGrid({ changesetId, masterKey, editable }: { changesetId: number; m
     [schema.data, refs.labels, refs.options, editable, actions],
   )
   const data = useMemo(
-    () => applyDrafts(rows.data ?? [], drafts, schema.data ?? []),
-    [rows.data, drafts, schema.data],
+    () => mergeCrossErrors(applyDrafts(rows.data ?? [], drafts, schema.data ?? []), validationErrors ?? [], masterKey),
+    [rows.data, drafts, schema.data, validationErrors, masterKey],
   )
   const table = useTable({ features, columns, data, getRowId: (row) => row.record_key })
+
+  const ready = !schema.isPending && !rows.isPending && !refs.isPending
+  useEffect(() => {
+    if (!jump || jump.master !== masterKey || !ready) {
+      return
+    }
+    const tr = document.getElementById(rowDomId(jump.recordKey))
+    if (tr) {
+      tr.scrollIntoView({ block: 'center' })
+      // 編集できるときは、エラーの列の入力欄にフォーカスを移す（キーボードだけでも続けて直せるように）
+      const field = jump.column
+        ? tr.querySelector<HTMLElement>(`[data-column="${jump.column}"] input, [data-column="${jump.column}"] select`)
+        : null
+      field?.focus({ preventScroll: true })
+      // 同じ行を続けて押しても強調し直せるよう、いったん外してから付け直す
+      tr.classList.remove('row-focus')
+      void tr.offsetWidth
+      tr.classList.add('row-focus')
+    }
+    onJumpHandled()
+  }, [jump, masterKey, ready, onJumpHandled])
 
   if (schema.isError || rows.isError) {
     return <p role="alert">データを取得できませんでした。</p>
@@ -220,17 +292,32 @@ function EditGrid({ changesetId, masterKey, editable }: { changesetId: number; m
           </thead>
           <tbody>
             {table.getRowModel().rows.map((row) => (
-              <tr key={row.id} className={`row-${row.original.status}${row.original.dirty ? ' row-dirty' : ''}`}>
+              <tr
+                key={row.id}
+                id={rowDomId(row.original.record_key)}
+                className={`row-${row.original.status}${row.original.dirty ? ' row-dirty' : ''}`}
+              >
                 {row.getAllCells().map((cell) => {
                   const column = schema.data.find((c) => c.key === cell.column.id)
-                  const error = column ? row.original.errors[column.key] : undefined
+                  // 行全体のエラー（参照されている行の削除など）は「状態」の列に出す
+                  const error =
+                    cell.column.id === 'status'
+                      ? row.original.errors[ROW_ERROR_KEY]
+                      : column
+                        ? row.original.errors[column.key]
+                        : undefined
                   const classes = [
                     column && isNumeric(column) ? 'num' : '',
                     column && isCellChanged(row.original, column.key) ? 'cell-changed' : '',
                     error ? 'cell-error' : '',
                   ].filter(Boolean)
                   return (
-                    <td key={cell.id} className={classes.join(' ') || undefined} title={error}>
+                    <td
+                      key={cell.id}
+                      className={classes.join(' ') || undefined}
+                      title={error}
+                      data-column={cell.column.id}
+                    >
                       <table.FlexRender cell={cell} />
                     </td>
                   )
@@ -465,6 +552,10 @@ function saveErrorMessage(error: unknown): string {
 function firstMessage(body: unknown): string {
   const errors = (body as { errors?: Record<string, string[]> } | null)?.errors
   return errors ? (Object.values(errors)[0]?.[0] ?? '') : ''
+}
+
+function rowDomId(recordKey: string): string {
+  return `row-${recordKey}`
 }
 
 function isNumeric(column: MasterColumn): boolean {

@@ -2,6 +2,7 @@ import { useCallback } from 'react'
 import { useMutation, useQueries, useQuery, useQueryClient, type UseQueryResult } from '@tanstack/react-query'
 import { apiFetch } from './api'
 import { changesetKeys } from './changesets'
+import { changesetValidationKey } from './changesetValidation'
 import type { CellValue, MasterColumn, RefLabels } from './masters'
 
 export type RowStatus = 'unchanged' | 'created' | 'updated' | 'deleted'
@@ -52,6 +53,8 @@ export function useSaveChangesetRecords(changesetId: number, masterKey: string) 
       // 変更件数や更新日時が変わるので、変更セットの詳細と一覧も取り直させる
       queryClient.invalidateQueries({ queryKey: changesetKeys.detail(changesetId) })
       queryClient.invalidateQueries({ queryKey: [...changesetKeys.all, 'list'] })
+      // 横断検証は他のマスタの行にも影響するので、変更セット全体の検証結果を取り直す
+      queryClient.invalidateQueries({ queryKey: changesetValidationKey(changesetId) })
     },
   })
 }
