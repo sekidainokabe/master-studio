@@ -16,6 +16,8 @@ return [
     'email' => ':attributeはメールアドレスの形式で入力してください。',
     'enum' => ':attributeは選択肢にない値です。',
     'exists' => '選択した:attributeは存在しません。',
+    'extensions' => ':attributeは :values のいずれかの形式のファイルにしてください。',
+    'file' => ':attributeにはファイルを指定してください。',
     'in' => ':attributeは選択肢にない値です。',
     'integer' => ':attributeは整数で入力してください。',
     'list' => ':attributeはリスト（配列）で指定してください。',
@@ -37,6 +39,7 @@ return [
     'required' => ':attributeは必須です。',
     'string' => ':attributeは文字列で入力してください。',
     'unique' => 'その:attributeはすでに使われています。',
+    'uploaded' => ':attributeをアップロードできませんでした。',
 
     'attributes' => [
         'email' => 'メールアドレス',

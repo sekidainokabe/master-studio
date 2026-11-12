@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChangesetController;
+use App\Http\Controllers\ChangesetCsvController;
 use App\Http\Controllers\ChangesetDiffController;
 use App\Http\Controllers\ChangesetRecordController;
 use App\Http\Controllers\ChangesetValidationController;
@@ -35,6 +36,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/changesets/{changeset}/masters/{masterTable:key}/records', [ChangesetRecordController::class, 'index'])
         ->withoutScopedBindings();
     Route::put('/changesets/{changeset}/masters/{masterTable:key}/records', [ChangesetRecordController::class, 'update'])
+        ->withoutScopedBindings();
+    Route::post('/changesets/{changeset}/masters/{masterTable:key}/import', [ChangesetCsvController::class, 'import'])
+        ->withoutScopedBindings();
+    Route::get('/changesets/{changeset}/masters/{masterTable:key}/export', [ChangesetCsvController::class, 'export'])
         ->withoutScopedBindings();
     // 反対に変更（item）は変更セットに属するため、URL の変更セットのものだけを探す。他の変更セットの id なら 404
     Route::delete('/changesets/{changeset}/items/{item}', [ChangesetRecordController::class, 'destroyItem'])

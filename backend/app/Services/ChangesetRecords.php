@@ -131,13 +131,14 @@ class ChangesetRecords
     }
 
     /**
-     * 値が同じかどうか。数値は 1 と 1.0 を同じとみなす（JSON を通すと区別できなくなるため）
+     * 値が同じかどうか。数値は 1 と 1.0 を同じとみなす（JSON を通すと区別できなくなるため）。
+     * CSV の取り込みで「変化なし」の行を数えるときにも使う
      *
      * @param  Collection<int, MasterColumn>  $columns
      * @param  array<string, mixed>  $a
      * @param  array<string, mixed>  $b
      */
-    private function sameData(Collection $columns, array $a, array $b): bool
+    public function sameData(Collection $columns, array $a, array $b): bool
     {
         return $columns->every(function (MasterColumn $c) use ($a, $b) {
             $x = $a[$c->key] ?? null;
