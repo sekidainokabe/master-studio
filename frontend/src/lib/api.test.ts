@@ -46,6 +46,17 @@ describe('apiFetch', () => {
     expect(fetchMock.mock.calls[0][1]?.body).toBe('{"email":"a@example.com"}')
   })
 
+  it('FormData はそのまま送り、Content-Type はブラウザに任せる', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(200, { data: {} }))
+    const form = new FormData()
+    form.append('file', new Blob(['record_key\n']), 'data.csv')
+
+    await apiFetch('/api/import', { method: 'POST', body: form })
+
+    expect(sentHeaders()).toEqual({ Accept: 'application/json', 'X-XSRF-TOKEN': 'abc==' })
+    expect(fetchMock.mock.calls[0][1]?.body).toBe(form)
+  })
+
   it('204 のときは undefined を返す', async () => {
     fetchMock.mockResolvedValue(new Response(null, { status: 204 }))
 

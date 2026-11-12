@@ -173,6 +173,30 @@ a {
   text-decoration: none;
 }
 
+.button-link.secondary {
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+}
+
+/* CSV の操作（編集画面） */
+.csv-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.csv-result {
+  flex-basis: 100%;
+}
+
+.csv-result p,
+.csv-result ul {
+  margin: 0;
+}
+
 /* 一覧・閲覧の表 */
 .filters {
   display: flex;

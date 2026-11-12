@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react'
 import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table'
 import { Link, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router'
+import { CsvTools } from '../components/CsvTools'
 import { StatusBadge } from '../components/StatusBadge'
 import { ValidationPanel, type JumpTarget } from '../components/ValidationPanel'
 import { ApiError } from '../lib/api'
@@ -266,6 +267,8 @@ function EditGrid({
       {editable && counts.errors > 0 && (
         <p className="sub">エラーがあっても保存できます。レビュー依頼の前にすべて直してください。</p>
       )}
+
+      <CsvTools changesetId={changesetId} masterKey={masterKey} editable={editable} dirty={dirtyCount > 0} />
 
       {editable && (
         <AddRowForm

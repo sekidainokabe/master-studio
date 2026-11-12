@@ -43,8 +43,10 @@ type ApiOptions = {
 
 export async function apiFetch<T>(path: string, { method = 'GET', body }: ApiOptions = {}): Promise<T> {
   const headers: Record<string, string> = { Accept: 'application/json' }
+  // ファイルの送信（FormData）は、ブラウザが区切り文字（boundary）付きの Content-Type を自分で付けるので、指定しない
+  const isForm = body instanceof FormData
 
-  if (body !== undefined) {
+  if (body !== undefined && !isForm) {
     headers['Content-Type'] = 'application/json'
   }
   if (!SAFE_METHODS.includes(method)) {
@@ -57,7 +59,7 @@ export async function apiFetch<T>(path: string, { method = 'GET', body }: ApiOpt
   const res = await fetch(path, {
     method,
     headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: body === undefined ? undefined : isForm ? body : JSON.stringify(body),
     credentials: 'same-origin',
   })
 
