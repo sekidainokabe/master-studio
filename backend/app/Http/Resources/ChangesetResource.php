@@ -31,10 +31,17 @@ class ChangesetResource extends JsonResource
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             // 画面でボタンを出すかどうかの判断に使う。最終的にはサーバーが Policy で拒否する
-            'can' => [
-                'update' => $request->user()?->can('update', $this->resource) ?? false,
-                'delete' => $request->user()?->can('delete', $this->resource) ?? false,
-            ],
+            'can' => collect(['update', 'delete', 'submit', 'approve', 'reject', 'reopen'])
+                ->mapWithKeys(fn (string $ability) => [$ability => $request->user()?->can($ability, $this->resource) ?? false])
+                ->all(),
         ];
+    }
+
+    /** 詳細画面用。作成者・承認者・基準のリリース・変更の件数を読み込んでから返す */
+    public static function detail(Changeset $changeset): self
+    {
+        return new self(
+            $changeset->load(['author:id,name', 'reviewer:id,name', 'baseRelease:id,version'])->loadCount('items'),
+        );
     }
 }

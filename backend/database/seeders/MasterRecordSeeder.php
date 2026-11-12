@@ -7,6 +7,7 @@ use App\Models\MasterRecord;
 use App\Models\MasterTable;
 use App\Models\Release;
 use App\Models\User;
+use App\Services\ReleaseExport;
 use Illuminate\Database\Seeder;
 use Random\Engine\Mt19937;
 use Random\Randomizer;
@@ -36,6 +37,9 @@ class MasterRecordSeeder extends Seeder
         ]);
         $this->insertStages();
         $this->insertStageEnemies();
+
+        // 初期リリースの出力 JSON（承認のときと同じ作り方）
+        $this->release->update(['content' => app(ReleaseExport::class)->content(1, $this->release->created_at)]);
     }
 
     /**

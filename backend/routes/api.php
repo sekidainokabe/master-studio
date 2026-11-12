@@ -5,6 +5,7 @@ use App\Http\Controllers\ChangesetController;
 use App\Http\Controllers\ChangesetCsvController;
 use App\Http\Controllers\ChangesetDiffController;
 use App\Http\Controllers\ChangesetRecordController;
+use App\Http\Controllers\ChangesetReviewController;
 use App\Http\Controllers\ChangesetValidationController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MasterController;
@@ -28,6 +29,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/changesets/{changeset}', [ChangesetController::class, 'show']);
     Route::patch('/changesets/{changeset}', [ChangesetController::class, 'update']);
     Route::delete('/changesets/{changeset}', [ChangesetController::class, 'destroy']);
+    Route::post('/changesets/{changeset}/submit', [ChangesetReviewController::class, 'submit']);
+    Route::post('/changesets/{changeset}/approve', [ChangesetReviewController::class, 'approve']);
+    Route::post('/changesets/{changeset}/reject', [ChangesetReviewController::class, 'reject']);
+    Route::post('/changesets/{changeset}/reopen', [ChangesetReviewController::class, 'reopen']);
     Route::get('/changesets/{changeset}/validation', ChangesetValidationController::class);
     Route::get('/changesets/{changeset}/diff', ChangesetDiffController::class);
 

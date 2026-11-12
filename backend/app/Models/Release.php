@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['version', 'changeset_id', 'released_by', 'export_path'])]
+#[Fillable(['version', 'changeset_id', 'released_by', 'content'])]
 class Release extends Model
 {
     // リリースは作成後に変更しないので updated_at を持たない

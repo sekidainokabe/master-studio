@@ -162,7 +162,8 @@ class ChangesetApiTest extends TestCase
 
         $this->actingAs($editor, 'web')
             ->getJson("/api/changesets/{$changeset->id}")
-            ->assertJsonPath('data.can', ['update' => true, 'delete' => true]);
+            ->assertJsonPath('data.can.update', true)
+            ->assertJsonPath('data.can.delete', true);
     }
 
     public function test_show_tells_approver_cannot_update(): void
@@ -171,7 +172,8 @@ class ChangesetApiTest extends TestCase
 
         $this->actingAs($this->user(UserRole::Approver), 'web')
             ->getJson("/api/changesets/{$changeset->id}")
-            ->assertJsonPath('data.can', ['update' => false, 'delete' => false]);
+            ->assertJsonPath('data.can.update', false)
+            ->assertJsonPath('data.can.delete', false);
     }
 
     public function test_author_can_update_title_and_description(): void

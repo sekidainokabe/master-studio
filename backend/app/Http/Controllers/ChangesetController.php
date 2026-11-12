@@ -75,8 +75,6 @@ class ChangesetController extends Controller
 
     private function detail(Changeset $changeset): ChangesetResource
     {
-        return new ChangesetResource(
-            $changeset->load(['author:id,name', 'reviewer:id,name', 'baseRelease:id,version'])->loadCount('items'),
-        );
+        return ChangesetResource::detail($changeset);
     }
 }

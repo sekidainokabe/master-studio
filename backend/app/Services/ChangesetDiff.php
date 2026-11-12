@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\ChangeOperation;
+use App\Enums\ChangesetStatus;
 use App\Models\Changeset;
 use App\Models\ChangesetItem;
 use App\Models\MasterColumn;
@@ -14,7 +15,8 @@ use App\Models\MasterTable;
  *
  * 比べる相手は、変更セットを作ったときの本番（before_data）ではなく、今の本番。
  * そのため作成後に本番が変わっていれば、それも反映した結果になる（例：すでに同じ値になった列は差分に出ない）。
- * 作成後に本番が変わったこと自体を知らせる競合の検出は、承認処理（第6週）で行う。
+ * 作成後に本番が変わったこと自体を知らせる競合の検出は、承認処理（ChangesetApproval）で行う。
+ * 反映済みの変更セットだけは、承認の時点の本番（before_data）と比べる。
  */
 class ChangesetDiff
 {
@@ -34,15 +36,21 @@ class ChangesetDiff
             return [];
         }
         $tables = MasterTable::with('columns')->whereIn('id', $items->pluck('master_table_id')->unique())->orderBy('id')->get();
-        $production = MasterRecord::whereIn('master_table_id', $tables->pluck('id'))
+
+        // 反映済みのときは、本番がすでに変わっているため、承認の時点で残した反映前の値（before_data）と比べる
+        $applied = $changeset->status === ChangesetStatus::Applied;
+        $production = $applied ? collect() : MasterRecord::whereIn('master_table_id', $tables->pluck('id'))
             ->whereIn('record_key', $items->pluck('record_key')->unique())
             ->get()
             ->keyBy(fn (MasterRecord $r) => "{$r->master_table_id}:{$r->record_key}");
+        $before = fn (ChangesetItem $item) => $applied
+            ? $item->before_data
+            : $production->get("{$item->master_table_id}:{$item->record_key}")?->data;
 
         $result = [];
         foreach ($tables as $table) {
             $rows = $items->where('master_table_id', $table->id)->sortBy('record_key', SORT_STRING)
-                ->map(fn (ChangesetItem $item) => $this->row($table, $item, $production->get("{$table->id}:{$item->record_key}")?->data))
+                ->map(fn (ChangesetItem $item) => $this->row($table, $item, $before($item)))
                 ->filter()
                 ->values()
                 ->all();
