@@ -91,7 +91,9 @@
 
 ### releases
 
-version（一意）、changeset_id、released_by、export_path（出力 JSON の保存先）、created_at
+version（一意）、changeset_id、released_by、content（出力 JSON の本文、LONGTEXT）、created_at
+
+出力 JSON はファイルではなく DB に保存する（本番の Railway のディスクは再デプロイで消えるため）。MySQL の JSON 型は列の並びを変えるため、文字列のまま保存する。
 
 ### audit_logs
 
@@ -207,14 +209,16 @@ user_id、action、target_type、target_id、detail（JSON）、created_at。(ta
 | GET | /api/releases | リリース履歴 |
 | GET | /api/releases/{version}/export | JSON 出力 |
 | GET | /api/audit-logs | 操作履歴（絞り込み・ページ送り） |
+| GET | /api/users | 操作履歴の絞り込み用の利用者一覧（id・名前・役割） |
 | GET / POST | /api/admin/users | ユーザー一覧・追加 |
 | PATCH | /api/admin/users/{id} | 役割の変更・無効化 |
 
 ## 8. 権限
 
-- editor：変更セットの作成、自分の変更セットの編集・レビュー依頼
-- approver：承認・却下（**自分が作成した変更セットは承認できない**）
-- admin：すべて（ユーザー管理を含む）
+- editor：変更セットの作成、自分の変更セットの編集・レビュー依頼、却下されたものを下書きに戻す
+- approver：承認・却下（**自分が作成した変更セットは承認・却下できない**）
+- admin：すべて（ユーザー管理を含む）。ただし admin も、**自分が作成した変更セットは承認・却下できない**（1人で作って反映できないようにする）
+- 権限がないときは 403、今の状態ではできない操作（下書きでないものの編集など）は 409 を返す
 - 操作履歴は admin と approver が閲覧できる
 - 無効化したユーザーはログインできない。過去の変更セットや操作履歴の作成者としては残す
 
@@ -222,12 +226,13 @@ user_id、action、target_type、target_id、detail（JSON）、created_at。(ta
 
 1つのトランザクションで次を行い、途中で失敗したらすべて巻き戻す。
 
-1. 対象レコードをロック
-2. base_release_id 以降に対象レコードが変更されていないか確認（競合検出）
-3. サーバー側で再検証
-4. 本番データへ反映
-5. リリース作成と JSON 出力
-6. 操作履歴の記録
+1. 承認どうしを1件ずつ順に処理させるため、全マスタ（master_tables の行）→ 変更セットの順にロック。横断検証は全マスタを見るため、対象のレコードだけのロックでは足りない。本番データを書き換えるのは承認だけなので、編集や閲覧は止まらない
+2. ロックを取ったあとで、権限と状態を確かめ直す（同時に2回承認されても、2回目は 409）
+3. base_release_id 以降に対象レコードが変更されていないか確認（競合検出。競合があれば 409 と、ぶつかった行の一覧）
+4. サーバー側で再検証（エラーがあれば 422）
+5. 本番データへ反映（変更前の値を before_data に固定し、反映後も差分を見られるようにする）
+6. リリース作成と JSON 出力
+7. 操作履歴の記録
 
 ## 10. 利用者への配慮と規模への備え
 

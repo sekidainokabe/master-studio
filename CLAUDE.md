@@ -54,6 +54,7 @@
 ./vendor/bin/sail artisan migrate    # マイグレーション
 ./vendor/bin/sail artisan migrate:fresh --seed   # DB を作り直してシード（開発データは消える）
 ./vendor/bin/sail artisan app:seed-if-empty      # 未シードのときだけシード（本番の起動時に実行される）
+./vendor/bin/sail artisan app:seed-demo          # デモ用の変更セットを、まだないときだけ入れる（本番の起動時に実行される）
 ./vendor/bin/sail artisan db:show    # DB 接続確認
 ./vendor/bin/sail test               # PHPUnit（MySQL の testing DB を使う）
 curl http://localhost/api/health     # API の疎通確認
@@ -76,7 +77,7 @@ npm run lint         # oxlint
 docker build -t master-studio:local .   # リポジトリ直下の Dockerfile でビルド
 ```
 
-ローカルで起動するときは Sail のネットワーク（`backend_sail`）につなぎ、`APP_KEY`・`DB_*`・`SANCTUM_STATEFUL_DOMAINS=localhost:8080` を渡して `-p 8080:8080` で起動する。起動時にマイグレーションと `app:seed-if-empty` が実行される。
+ローカルで起動するときは Sail のネットワーク（`backend_sail`）につなぎ、`APP_KEY`・`DB_*`・`SANCTUM_STATEFUL_DOMAINS=localhost:8080` を渡して `-p 8080:8080` で起動する。起動時にマイグレーション、`app:seed-if-empty`、`app:seed-demo` が実行される。
 
 ### ポート
 
@@ -94,7 +95,8 @@ docker build -t master-studio:local .   # リポジトリ直下の Dockerfile �
   - 前倒しで進めた（11/11 完了）。計画と進捗は docs/plan-week4.md
 - [x] 第5週（11/23〜11/29）：サーバー側横断検証、CSV 取り込み、差分
   - 前倒しで進めた（11/12 完了）。計画と進捗は docs/plan-week5.md
-- [ ] 第6週（11/30〜12/6）：承認フロー、リリース、JSON 出力、権限、操作履歴（記録と閲覧画面）、テスト、デモ用シード
+- [x] 第6週（11/30〜12/6）：承認フロー、リリース、JSON 出力、権限、操作履歴（記録と閲覧画面）、テスト、デモ用シード
+  - 前倒しで進めた（11/13 完了）。計画と進捗は docs/plan-week6.md
 - [ ] 第7週（12/7〜12/13）：社内ツールとしての仕上げ（ユーザー管理画面、画面内の案内と使い方ガイド、100名規模のデータでの SQL 回数・実行計画の確認、アクセシビリティ点検）
 - [ ] 第8週（12/14〜12/20）：README（課題 → 設計判断 → 規模への備え → 運用）、募集要件との対応表、デモ GIF、応募
 
