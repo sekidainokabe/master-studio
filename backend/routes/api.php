@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChangesetController;
 use App\Http\Controllers\ChangesetCsvController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\ChangesetValidationController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MasterController;
 use App\Http\Controllers\ReleaseController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
@@ -38,6 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/changesets/{changeset}/diff', ChangesetDiffController::class);
 
     // {release:version}：URL には id ではなく、画面に出している版の番号を使う
+    Route::get('/audit-logs', [AuditLogController::class, 'index']);
+    Route::get('/users', [UserController::class, 'index']);
+
     Route::get('/releases', [ReleaseController::class, 'index']);
     Route::get('/releases/{release:version}/export', [ReleaseController::class, 'export']);
 

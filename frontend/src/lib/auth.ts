@@ -11,6 +11,7 @@ export type User = {
   /** サーバーの Policy で判定した権限。ボタンの出し分けに使う（最終的な判定はサーバー側） */
   can: {
     create_changeset: boolean
+    view_audit_logs: boolean
   }
 }
 

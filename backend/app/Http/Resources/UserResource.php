@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\AuditLog;
 use App\Models\Changeset;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ class UserResource extends JsonResource
             // 画面でボタンを出し分けるための権限。判定は Policy に任せ、フロントに権限のルールを重複させない
             'can' => [
                 'create_changeset' => $this->resource->can('create', Changeset::class),
+                'view_audit_logs' => $this->resource->can('viewAny', AuditLog::class),
             ],
         ];
     }

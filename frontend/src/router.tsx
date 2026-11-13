@@ -1,5 +1,6 @@
 import { createBrowserRouter } from 'react-router'
 import { AppLayout } from './components/AppLayout'
+import { AuditLogsPage } from './pages/AuditLogsPage'
 import { RequireAuth } from './components/RequireAuth'
 import { ChangesetDetailPage } from './pages/ChangesetDetailPage'
 import { ChangesetEditPage } from './pages/ChangesetEditPage'
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
           { path: 'changesets/:id', element: <ChangesetDetailPage /> },
           { path: 'changesets/:id/edit', element: <ChangesetEditPage /> },
           { path: 'releases', element: <ReleasesPage /> },
+          { path: 'audit-logs', element: <AuditLogsPage /> },
         ],
       },
     ],

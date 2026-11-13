@@ -19,6 +19,7 @@ export function AppLayout() {
           <NavLink to="/masters">マスタ</NavLink>
           <NavLink to="/changesets">変更セット</NavLink>
           <NavLink to="/releases">リリース</NavLink>
+          {user?.can.view_audit_logs && <NavLink to="/audit-logs">操作履歴</NavLink>}
         </nav>
         {user && (
           <div className="app-user">

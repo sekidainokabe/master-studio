@@ -40,7 +40,7 @@ class AuthTest extends TestCase
                 'name' => $this->user->name,
                 'email' => 'editor@example.com',
                 'role' => 'editor',
-                'can' => ['create_changeset' => true],
+                'can' => ['create_changeset' => true, 'view_audit_logs' => false],
             ],
         ]);
         $this->assertAuthenticatedAs($this->user, 'web');
