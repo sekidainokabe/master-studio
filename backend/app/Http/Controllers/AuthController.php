@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditAction;
 use App\Http\Requests\LoginRequest;
 use App\Http\Resources\UserResource;
+use App\Services\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
@@ -14,7 +16,7 @@ use Illuminate\Validation\ValidationException;
  */
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request): UserResource
+    public function login(LoginRequest $request, AuditLogger $audit): UserResource
     {
         if (! Auth::guard('web')->attempt($request->validated())) {
             // どちらが違うかは教えない（登録済みのメールアドレスを探られないようにするため）
@@ -25,6 +27,9 @@ class AuthController extends Controller
 
         // セッション固定攻撃への対策：ログイン前のセッション ID を使い回さない
         $request->session()->regenerate();
+
+        // 失敗したログインは残さない（回数の制限は throttle:login で行っている）
+        $audit->record($request->user(), AuditAction::Login, $request->user());
 
         return new UserResource($request->user());
     }

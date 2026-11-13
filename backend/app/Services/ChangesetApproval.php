@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\AuditAction;
 use App\Enums\ChangeOperation;
 use App\Enums\ChangesetStatus;
 use App\Exceptions\ChangesetConflictException;
@@ -21,7 +22,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * 変更セットの承認と本番への反映（docs/SPEC.md 9章）。
  *
- * 1つのトランザクションで「ロック → 競合の確認 → 再検証 → 本番へ反映 → リリース作成と JSON 出力」を行い、
+ * 1つのトランザクションで「ロック → 競合の確認 → 再検証 → 本番へ反映 → リリース作成と JSON 出力 → 操作履歴」を行い、
  * 途中で失敗したらすべて巻き戻す（本番データが半分だけ変わった状態を残さない）。
  */
 class ChangesetApproval
@@ -29,6 +30,7 @@ class ChangesetApproval
     public function __construct(
         private readonly CrossValidator $validator,
         private readonly ReleaseExport $export,
+        private readonly AuditLogger $audit,
     ) {}
 
     /**
@@ -88,6 +90,12 @@ class ChangesetApproval
                 'reviewer_id' => $approver->id,
                 'review_comment' => $comment,
                 'reviewed_at' => $releasedAt,
+            ]);
+
+            $this->audit->record($approver, AuditAction::Approved, $changeset, [
+                'version' => $release->version,
+                'item_count' => $items->count(),
+                'comment' => $comment,
             ]);
 
             return $release;

@@ -72,10 +72,11 @@ class ChangesetRecords
      * ルール違反の値もそのまま保存し、結果は rows() のエラーで返す（docs/plan-week4.md）
      *
      * @param  list<array{record_key: string, data: array<string, mixed>|null}>  $records
+     * @return array{created: int, updated: int, deleted: int, reverted: int} 保存した行の操作ごとの件数（reverted は本番と同じに戻った行）
      */
-    public function save(Changeset $changeset, MasterTable $table, array $records): void
+    public function save(Changeset $changeset, MasterTable $table, array $records): array
     {
-        DB::transaction(function () use ($changeset, $table, $records) {
+        return DB::transaction(function () use ($changeset, $table, $records) {
             // 同じ変更セットへの保存が同時に来たとき、1つずつ順に処理させる
             Changeset::whereKey($changeset->id)->lockForUpdate()->first();
 
@@ -83,18 +84,28 @@ class ChangesetRecords
             $production = $table->records()->whereIn('record_key', array_column($records, 'record_key'))->get()->keyBy('record_key');
             $items = $this->itemsOf($changeset, $table);
 
+            $counts = ['created' => 0, 'updated' => 0, 'deleted' => 0, 'reverted' => 0];
             foreach ($records as ['record_key' => $key, 'data' => $data]) {
-                $this->saveOne($changeset, $table, $key, $data === null ? null : $this->normalize($columns, $data), $production->get($key), $items->get($key));
+                $operation = $this->saveOne($changeset, $table, $key, $data === null ? null : $this->normalize($columns, $data), $production->get($key), $items->get($key));
+                $counts[match ($operation) {
+                    ChangeOperation::Create => 'created',
+                    ChangeOperation::Update => 'updated',
+                    ChangeOperation::Delete => 'deleted',
+                    null => 'reverted',
+                }]++;
             }
 
             $changeset->touch();
+
+            return $counts;
         });
     }
 
     /**
      * @param  array<string, mixed>|null  $data
+     * @return ChangeOperation|null 記録した操作（本番と同じに戻ったときは null）
      */
-    private function saveOne(Changeset $changeset, MasterTable $table, string $key, ?array $data, ?MasterRecord $record, ?ChangesetItem $item): void
+    private function saveOne(Changeset $changeset, MasterTable $table, string $key, ?array $data, ?MasterRecord $record, ?ChangesetItem $item): ?ChangeOperation
     {
         [$operation, $before] = match (true) {
             // 本番にない行の削除 = 変更セットで追加した行の取り消し。記録ごと消す
@@ -109,13 +120,15 @@ class ChangesetRecords
         if ($operation === null) {
             $item?->delete();
 
-            return;
+            return null;
         }
 
         ChangesetItem::updateOrCreate(
             ['changeset_id' => $changeset->id, 'master_table_id' => $table->id, 'record_key' => $key],
             ['operation' => $operation, 'before_data' => $before, 'after_data' => $data],
         );
+
+        return $operation;
     }
 
     /**

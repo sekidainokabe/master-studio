@@ -2,24 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AuditAction;
 use App\Http\Requests\ImportChangesetCsvRequest;
 use App\Models\Changeset;
 use App\Models\MasterTable;
+use App\Services\AuditLogger;
 use App\Services\ChangesetCsv;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 /**
  * 変更セットの中の1つのマスタを、CSV で取り込む・書き出す
  */
 class ChangesetCsvController extends Controller
 {
-    public function __construct(private readonly ChangesetCsv $csv) {}
+    public function __construct(
+        private readonly ChangesetCsv $csv,
+        private readonly AuditLogger $audit,
+    ) {}
 
     /** 取り込んで保存し、追加・更新・変化なしの件数を返す */
     public function import(ImportChangesetCsvRequest $request, Changeset $changeset, MasterTable $masterTable): JsonResponse
     {
-        $counts = $this->csv->import($changeset, $masterTable, $request->file('file')->getContent());
+        $file = $request->file('file');
+        $counts = DB::transaction(function () use ($request, $changeset, $masterTable, $file) {
+            $counts = $this->csv->import($changeset, $masterTable, $file->getContent());
+            $this->audit->record($request->user(), AuditAction::CsvImported, $changeset, [
+                'master' => $masterTable->key,
+                'filename' => $file->getClientOriginalName(),
+                ...$counts,
+            ]);
+
+            return $counts;
+        });
 
         return response()->json(['data' => $counts]);
     }
