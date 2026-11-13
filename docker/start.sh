@@ -10,5 +10,7 @@ php artisan route:cache
 
 php artisan migrate --force
 php artisan app:seed-if-empty
+# デモ用データは、入れられなくてもアプリの起動は止めない（本番のデータが変わっていて、使う行がない場合など）
+php artisan app:seed-demo || echo "デモ用データを入れられませんでした（起動は続けます）"
 
 exec frankenphp run --config /etc/caddy/Caddyfile
