@@ -40,10 +40,11 @@ cd ~/master-studio && git ls-files -z | tar --null -T - -c | docker build -t mas
 
 1. `config:cache` / `route:cache`
 2. `migrate --force`
-3. `app:seed-if-empty`：ユーザーが1人もいないときだけ、デモ用のデータを入れる
-4. Web サーバー（FrankenPHP）の起動
+3. `app:seed-if-empty`：ユーザーが1人もいないときだけ、初期データ（ユーザー・マスタ・v1 のリリース）を入れる
+4. `app:seed-demo`：デモ用の変更セット（反映済み1つ・エラー入りの下書き1つ）が、まだないときだけ入れる
+5. Web サーバー（FrankenPHP）の起動
 
-どこかで失敗すると、Web サーバーまで進まない。その場合は Healthcheck failure になるので、「View logs」→「Deploy Logs」で原因を確かめる。
+4 以外のどこかで失敗すると、Web サーバーまで進まない（4 は失敗しても起動を続け、ログに「デモ用データを入れられませんでした」と出る）。その場合は Healthcheck failure になるので、「View logs」→「Deploy Logs」で原因を確かめる。
 
 ## 環境変数（アプリのサービス）
 
