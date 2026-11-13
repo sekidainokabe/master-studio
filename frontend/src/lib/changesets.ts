@@ -30,7 +30,7 @@ export type Changeset = {
   created_at: string
   updated_at: string
   /** ログイン中のユーザーができる操作（ボタンの表示に使う。最終的にはサーバーが拒否する） */
-  can: { update: boolean; delete: boolean }
+  can: { update: boolean; delete: boolean; submit: boolean; approve: boolean; reject: boolean; reopen: boolean }
 }
 
 /** Laravel の paginate() が返す形のうち、画面で使う部分 */

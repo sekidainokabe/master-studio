@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react
 import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table'
 import { Link, useBlocker, useNavigate, useParams, useSearchParams } from 'react-router'
 import { CsvTools } from '../components/CsvTools'
+import { SubmitReviewButton } from '../components/ReviewActions'
 import { StatusBadge } from '../components/StatusBadge'
 import { ValidationPanel, type JumpTarget } from '../components/ValidationPanel'
 import { ApiError } from '../lib/api'
@@ -49,6 +50,8 @@ export function ChangesetEditPage() {
   // 検証結果のパネルで押したエラーの場所。表が描画されたら、その行まで移動する
   const [jump, setJump] = useState<JumpTarget | null>(null)
   const clearJump = useCallback(() => setJump(null), [])
+  // 表の未保存の編集の有無。未保存のままではレビューを依頼させない
+  const [dirty, setDirty] = useState(false)
 
   if (changeset.isError || masters.isError) {
     return <p role="alert">変更セットを取得できませんでした。存在しない変更セットの可能性があります。</p>
@@ -83,11 +86,19 @@ export function ChangesetEditPage() {
       </div>
       {!c.can.update && (
         <p className="notice">
-          {c.status === 'draft'
-            ? 'この変更セットは閲覧のみです。編集できるのは作成者と管理者です。'
-            : '下書きではないため、閲覧のみです。'}
+          {c.status === 'draft' && 'この変更セットは閲覧のみです。編集できるのは作成者と管理者です。'}
+          {c.status === 'in_review' && 'レビュー中のため、閲覧のみです。'}
+          {c.status === 'rejected' && (
+            <>
+              却下されたため、閲覧のみです。作成者は<Link to={`/changesets/${c.id}`}>詳細画面</Link>
+              で下書きに戻すと、修正できます。
+            </>
+          )}
+          {c.status === 'applied' && '本番に反映済みのため、閲覧のみです。'}
         </p>
       )}
+
+      {c.can.submit && <SubmitReviewButton changeset={c} dirty={dirty} />}
 
       <ValidationPanel changesetId={c.id} masters={masters.data} onJump={handleJump} />
 
@@ -119,6 +130,7 @@ export function ChangesetEditPage() {
           validationErrors={validation.data?.errors}
           jump={jump}
           onJumpHandled={clearJump}
+          onDirtyChange={setDirty}
         />
       ) : (
         <p role="alert">指定されたマスタはありません。上のタブから選んでください。</p>
@@ -152,6 +164,7 @@ function EditGrid({
   validationErrors,
   jump,
   onJumpHandled,
+  onDirtyChange,
 }: {
   changesetId: number
   masterKey: string
@@ -159,6 +172,7 @@ function EditGrid({
   validationErrors: ValidationError[] | undefined
   jump: JumpTarget | null
   onJumpHandled: () => void
+  onDirtyChange: (dirty: boolean) => void
 }) {
   const schema = useMasterSchema(masterKey)
   const rows = useChangesetRecords(changesetId, masterKey)
@@ -168,6 +182,11 @@ function EditGrid({
 
   const dirtyCount = Object.keys(drafts).length
   useLeaveWarning(dirtyCount > 0)
+  // 親（レビュー依頼のボタン）に未保存の編集の有無を伝える。タブを切り替えて表が作り直されたら false に戻す
+  useEffect(() => {
+    onDirtyChange(dirtyCount > 0)
+  }, [dirtyCount, onDirtyChange])
+  useEffect(() => () => onDirtyChange(false), [onDirtyChange])
 
   const actions = useMemo<Actions>(
     () => ({

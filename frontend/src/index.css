@@ -516,6 +516,39 @@ button.link {
   }
 }
 
+/* レビューの操作（編集画面・詳細画面） */
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.review-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+}
+
+.review-panel .button-row {
+  margin: 0;
+}
+
+.review-error p,
+.review-error ul {
+  margin: 4px 0;
+}
+
+.notice-danger {
+  border-color: var(--danger);
+}
+
+.notice p {
+  margin: 4px 0 0;
+}
+
 /* ログイン画面 */
 .login {
   max-width: 360px;
