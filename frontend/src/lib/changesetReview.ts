@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { ApiError, apiFetch } from './api'
 import { changesetKeys, type Changeset } from './changesets'
 import { masterKeys } from './masters'
+import { releaseKeys } from './releases'
 
 /** 変更セットの状態を変える操作（レビュー依頼・承認・却下・下書きに戻す） */
 export type ReviewAction = 'submit' | 'approve' | 'reject' | 'reopen'
@@ -26,6 +27,8 @@ export function useReviewAction(changesetId: number) {
         // 本番データが変わったため、本番の閲覧と、本番に変更を重ねている他の変更セットの表示も取り直す
         queryClient.invalidateQueries({ queryKey: masterKeys.all })
         queryClient.invalidateQueries({ queryKey: changesetKeys.all })
+        // 新しいリリースが1つ増える
+        queryClient.invalidateQueries({ queryKey: [...releaseKeys.all, 'list'] })
       } else {
         // 下書きに戻すと基準のリリースが変わり、差分や検証の結果が変わることがある
         queryClient.invalidateQueries({ queryKey: ['changesets', changesetId] })

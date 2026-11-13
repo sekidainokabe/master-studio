@@ -549,6 +549,40 @@ button.link {
   margin: 4px 0 0;
 }
 
+/* リリース */
+.release-list {
+  margin: 16px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.release-item {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.release-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 20px;
+}
+
+.release-actions {
+  margin: 8px 0;
+}
+
+.json-preview {
+  max-height: 50vh;
+  overflow: auto;
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  font: 0.85em/1.5 ui-monospace, Consolas, monospace;
+}
+
 /* ログイン画面 */
 .login {
   max-width: 360px;

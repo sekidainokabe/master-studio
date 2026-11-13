@@ -18,6 +18,7 @@ export function AppLayout() {
         <nav className="app-nav">
           <NavLink to="/masters">マスタ</NavLink>
           <NavLink to="/changesets">変更セット</NavLink>
+          <NavLink to="/releases">リリース</NavLink>
         </nav>
         {user && (
           <div className="app-user">

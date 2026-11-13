@@ -9,6 +9,7 @@ use App\Http\Controllers\ChangesetReviewController;
 use App\Http\Controllers\ChangesetValidationController;
 use App\Http\Controllers\HealthController;
 use App\Http\Controllers\MasterController;
+use App\Http\Controllers\ReleaseController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/health', HealthController::class);
@@ -35,6 +36,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/changesets/{changeset}/reopen', [ChangesetReviewController::class, 'reopen']);
     Route::get('/changesets/{changeset}/validation', ChangesetValidationController::class);
     Route::get('/changesets/{changeset}/diff', ChangesetDiffController::class);
+
+    // {release:version}：URL には id ではなく、画面に出している版の番号を使う
+    Route::get('/releases', [ReleaseController::class, 'index']);
+    Route::get('/releases/{release:version}/export', [ReleaseController::class, 'export']);
 
     // URL の中で2つ目以降のモデルを key で取り出すと、Laravel は「1つ目のモデルに属するもの」だけを探す（$changeset->masterTables()）。
     // マスタは変更セットに属さないため、この絞り込みを外す

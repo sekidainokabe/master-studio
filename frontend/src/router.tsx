@@ -9,6 +9,7 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MasterDetailPage } from './pages/MasterDetailPage'
 import { MastersPage } from './pages/MastersPage'
+import { ReleasesPage } from './pages/ReleasesPage'
 
 export const router = createBrowserRouter([
   { path: '/login', element: <LoginPage /> },
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
           { path: 'changesets/new', element: <ChangesetNewPage /> },
           { path: 'changesets/:id', element: <ChangesetDetailPage /> },
           { path: 'changesets/:id/edit', element: <ChangesetEditPage /> },
+          { path: 'releases', element: <ReleasesPage /> },
         ],
       },
     ],
